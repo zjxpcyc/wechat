@@ -8,12 +8,12 @@
 ## 简易使用说明
 **安装**
 ```bash
-go get "github.com/yansen/wechat"
+go get "github.com/zjxpcyc/wechat"
 ```
 
 
 ```go
-import "github.com/yansen/wechat"
+import "github.com/zjxpcyc/wechat"
 
 ...
 
