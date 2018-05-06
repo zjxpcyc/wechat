@@ -25,8 +25,18 @@ certificate := map[string]string{
 	"aeskey": "",
 }
 
+// 一个日志记录器, 需要实现如下接口
+// type Log interface {
+// 	Critical(string, ...interface{})
+// 	Error(string, ...interface{})
+// 	Warning(string, ...interface{})
+// 	Info(string, ...interface{})
+// 	Debug(string, ...interface{})
+// }
+log := &AnLogger{}
+
 // 初始化, 之后就可以正常使用了
-wx := wechat.NewClient(certificate)
+wx := wechat.NewClient(certificate, log)
 ```
 
 **示例**
