@@ -41,6 +41,10 @@ func (t *DefaultScheduleServer) Stop() {
 
 // Start 启动服务
 func (t *DefaultScheduleServer) Start() {
+	go t.start()
+}
+
+func (t *DefaultScheduleServer) start() {
 	go func() {
 		d := t.task()
 		for {
