@@ -2,11 +2,9 @@ package core
 
 import (
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strconv"
 )
 
 // Request 可以直接使用的 http request
@@ -15,12 +13,24 @@ type Request interface {
 	GetJSON(APIInfo, url.Values) (map[string]interface{}, error)
 }
 
+// CheckJSONResult 验证 Json 结果
+type CheckJSONResult func(map[string]interface{}) error
+
 // DefaultRequest 简易 http request
-type DefaultRequest struct{}
+type DefaultRequest struct {
+	checkJSONResult CheckJSONResult
+}
+
+// NewDefaultRequest 初始化
+func NewDefaultRequest(checkJSONResult CheckJSONResult) *DefaultRequest {
+	return &DefaultRequest{
+		checkJSONResult: checkJSONResult,
+	}
+}
 
 // GetJSON GET 远程数据, 并返回 json
 func (t *DefaultRequest) GetJSON(api APIInfo, params url.Values) (map[string]interface{}, error) {
-	apiURL, _ := url.Parse(APIDomain + api.URI)
+	apiURL, _ := url.Parse(api.URI)
 	query := apiURL.Query()
 
 	for k := range params {
@@ -62,27 +72,6 @@ func (t *DefaultRequest) jsonResult(resp *http.Response) (map[string]interface{}
 	}
 
 	return res, nil
-}
-
-func (t *DefaultRequest) checkJSONResult(res map[string]interface{}) error {
-	log.Info("接口返回结果: ", res)
-
-	errcode, _ := res["errcode"]
-	errmsg, _ := res["errmsg"]
-	if errcode == nil {
-		return nil
-	}
-
-	err, _ := errcode.(float64)
-	errNum := int(err)
-
-	if errNum == 0 {
-		return nil
-	}
-
-	msg, _ := errmsg.(string)
-	log.Error("接口返回错误: " + strconv.Itoa(errNum) + "-" + msg)
-	return errors.New(msg)
 }
 
 var _ Request = &DefaultRequest{}

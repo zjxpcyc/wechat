@@ -1,39 +1,47 @@
 package core
 
-// Log 日志
-type Log interface {
-	Critical(string, ...interface{})
-	Error(string, ...interface{})
-	Warning(string, ...interface{})
-	Info(string, ...interface{})
-	Debug(string, ...interface{})
+// APIInfo API 接口信息
+type APIInfo struct {
+	Method       string
+	URI          string
+	ResponseType string
 }
 
 // Kernel 默认核心类
 type Kernel struct {
-	tokenServer AccessTokenServer
+	scheduleServer ScheduleTask
+	certificate    map[string]string
 }
 
 var log Log
 
 // NewKernel 初始化
-func NewKernel(certificate map[string]string) *Kernel {
-	return &Kernel{
-		tokenServer: NewDefaultTokenServer(certificate),
-	}
+func NewKernel() *Kernel {
+	return &Kernel{}
 }
 
-// SetLogInst 设置全局日志实例
-func (t *Kernel) SetLogInst(l Log) {
-	log = l
+// SetScheduleTask 设置定时任务
+func (t *Kernel) SetScheduleTask(scheduleServer ScheduleTask) {
+	t.scheduleServer = scheduleServer
+}
+
+// SetTask 设置任务
+func (t *Kernel) SetTask(task Task) {
+	t.scheduleServer = NewDefaultScheduleServer()
+	taskServer, _ := t.scheduleServer.(*DefaultScheduleServer)
+	taskServer.SetTask(task)
 }
 
 // StartTokenServer 启动 AccessTokenServer
 func (t *Kernel) StartTokenServer() {
-	t.tokenServer.Start()
+	t.scheduleServer.Start()
 }
 
-// GetAccessToken 获取最新 access_token
-func (t *Kernel) GetAccessToken() string {
-	return t.tokenServer.Get()
+// SetLogInst 设置全局日志实例
+func SetLogInst(l Log) {
+	log = l
+}
+
+func init() {
+	log = &DefaultLogger{}
 }

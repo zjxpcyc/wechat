@@ -4,13 +4,17 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"sort"
-	"wechat/core"
+
+	"github.com/zjxpcyc/wechat/core"
 )
 
-// Client 微信接口客户端
+var log core.Log
+
+// Client 微信公众号接口客户端
 type Client struct {
-	kernel *core.Kernel
-	log    core.Log
+	accessToken string
+	kernel      *core.Kernel
+	request     core.Request
 
 	/*
 	* certificate key 值如下:
@@ -24,16 +28,16 @@ type Client struct {
 
 // NewClient 初始客户端
 func NewClient(certificate map[string]string, log core.Log) *Client {
-	cli := Client{
-		log:         log,
-		kernel:      core.NewKernel(certificate),
+	cli := &Client{
+		request:     core.NewDefaultRequest(checkJSONResult),
+		kernel:      core.NewKernel(),
 		certificate: certificate,
 	}
 
-	cli.kernel.SetLogInst(log)
+	cli.kernel.SetTask(cli.Task)
 	cli.kernel.StartTokenServer()
 
-	return &cli
+	return cli
 }
 
 // GetAppID 获取 AppID
@@ -55,8 +59,11 @@ func (t *Client) Signature(timestamp, nonce string) string {
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
-var request core.Request
+// SetLogInst 设置全局日志实例
+func SetLogInst(l core.Log) {
+	core.SetLogInst(l)
+}
 
 func init() {
-	request = &core.DefaultRequest{}
+	log = &core.DefaultLogger{}
 }
