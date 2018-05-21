@@ -15,7 +15,7 @@ func (t *Client) Task() time.Duration {
 	}
 
 	t.accessToken = token
-	return time.Duration(expire)
+	return time.Duration(expire) * time.Second
 }
 
 // getToken 获取 token
