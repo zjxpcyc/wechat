@@ -2,6 +2,8 @@ package core
 
 import (
 	"encoding/json"
+	"encoding/xml"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -9,8 +11,8 @@ import (
 
 // Request 可以直接使用的 http request
 type Request interface {
-	// GetJSON GET 远程数据, 并返回 json
-	GetJSON(APIInfo, url.Values) (map[string]interface{}, error)
+	// Do 自动识别 http method, 请求数据并返回
+	Do(API, url.Values, ...io.Reader) (map[string]interface{}, error)
 }
 
 // CheckJSONResult 验证 Json 结果
@@ -28,46 +30,89 @@ func NewDefaultRequest(checkJSONResult CheckJSONResult) *DefaultRequest {
 	}
 }
 
-// GetJSON GET 远程数据, 并返回 json
-func (t *DefaultRequest) GetJSON(api APIInfo, params url.Values) (map[string]interface{}, error) {
-	apiURL, _ := url.Parse(api.URI)
-	query := apiURL.Query()
+// Do 请求远程数据
+func (t *DefaultRequest) Do(api API, params url.Values, body ...io.Reader) (map[string]interface{}, error) {
+	var req *http.Request
+	var err error
+	client := &http.Client{}
+	URL := api.URI
 
-	for k := range params {
-		query.Set(k, params.Get(k))
+	if params != nil {
+		apiURL, _ := url.Parse(api.URI)
+		query := apiURL.Query()
+		for k := range params {
+			query.Set(k, params.Get(k))
+		}
+		apiURL.RawQuery = query.Encode()
+		URL = apiURL.String()
 	}
 
-	apiURL.RawQuery = query.Encode()
-	remoteAddr := apiURL.String()
+	log.Info("请求远程接口: ", URL)
 
-	log.Info("请求远程接口: ", remoteAddr)
-
-	resp, err := http.Get(remoteAddr)
+	if api.Method == http.MethodGet || len(body) == 0 {
+		req, err = http.NewRequest(api.Method, URL, nil)
+	} else {
+		req, err = http.NewRequest(api.Method, URL, body[0])
+	}
 	if err != nil {
-		log.Error("请求远程数据失败 (GET: "+remoteAddr+")", err.Error())
+		log.Error("初始化请求客户端失败", err.Error())
 		return nil, err
 	}
 
-	var res map[string]interface{}
-	res, err = t.jsonResult(resp)
+	if api.ResponseType == ResponseXML {
+		req.Header.Add("Content-type", "text/xml")
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
+		log.Error("请求远程数据失败", err.Error())
 		return nil, err
 	}
 
-	return res, t.checkJSONResult(res)
-}
-
-func (t *DefaultRequest) jsonResult(resp *http.Response) (map[string]interface{}, error) {
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Error("解析请求结果失败, ", err.Error())
 		return nil, err
 	}
 
+	log.Info("远程请求结果:", string(respBody))
+
+	if api.ResponseType == ResponseJSON {
+		var res map[string]interface{}
+		res, err = t.jsonResult(respBody)
+		if err != nil {
+			return nil, err
+		}
+
+		return res, t.checkJSONResult(res)
+	} else if api.ResponseType == ResponseXML {
+		var res map[string]interface{}
+		res, err = t.xmlResult(respBody)
+		if err != nil {
+			return nil, err
+		}
+
+		return res, nil
+	}
+
+	return nil, nil
+}
+
+func (t *DefaultRequest) jsonResult(body []byte) (map[string]interface{}, error) {
 	var res map[string]interface{}
 	if err := json.Unmarshal(body, &res); err != nil {
 		log.Error("转换请求结果(JSON)失败", err.Error())
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func (t *DefaultRequest) xmlResult(body []byte) (map[string]interface{}, error) {
+	var res map[string]interface{}
+	if err := xml.Unmarshal(body, &res); err != nil {
+		log.Error("转换请求结果(XML)失败", err.Error())
 		return nil, err
 	}
 

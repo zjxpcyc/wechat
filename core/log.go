@@ -26,3 +26,5 @@ func (t *DefaultLogger) Info(f string, v ...interface{}) {}
 
 // Debug Debug
 func (t *DefaultLogger) Debug(f string, v ...interface{}) {}
+
+var _ Log = &DefaultLogger{}

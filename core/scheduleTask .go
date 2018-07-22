@@ -44,9 +44,14 @@ func (t *DefaultScheduleServer) Start() {
 	go t.start()
 }
 
+/**
+* 定时任务
+* 不依赖文件系统 或者 DB, 依据每次调用反馈的结果，进行下一次任务定时设置
+ */
+
 func (t *DefaultScheduleServer) start() {
 	go func() {
-		d := t.task()
+		d := t.task() // 上次任务, 返回下一次的执行周期
 		for {
 			time.Sleep(d)
 			d = t.task()
@@ -62,52 +67,5 @@ func (t *DefaultScheduleServer) start() {
 		}
 	}
 }
-
-// // task 定时任务
-// func (t *DefaultTokenServer) task() {
-// 	// 发生错误 60 秒后重试
-// 	var reTry int64 = 60
-// 	token, expire, err := t.getToken()
-// 	if err != nil {
-// 		expire = reTry
-// 	}
-
-// 	t.token = token
-// 	log.Info("TokenServer 获取到 access_token: " + token)
-// 	ticker := time.NewTicker(time.Second * time.Duration(expire))
-
-// 	for {
-// 		select {
-// 		case <-ticker.C:
-// 			ticker.Stop()
-
-// 			token, expire, err = t.getToken()
-// 			if err != nil {
-// 				expire = reTry
-// 			}
-
-// 			t.token = token
-// 			log.Info("TokenServer 获取到 access_token: " + token)
-// 			ticker = time.NewTicker(time.Second * time.Duration(expire))
-// 		}
-// 	}
-// }
-
-// // getToken 获取 token
-// func (t *DefaultTokenServer) getToken() (string, int64, error) {
-// 	api := WxAPI["access_token"]["get"]
-// 	params := url.Values{}
-// 	params.Set("appid", t.certificate["appid"])
-// 	params.Set("secret", t.certificate["secret"])
-
-// 	res, err := t.request.GetJSON(api, params)
-// 	if err != nil {
-// 		return "", 0, err
-// 	}
-
-// 	token := res["access_token"].(string)
-// 	expire := res["expires_in"].(float64)
-// 	return token, int64(expire), nil
-// }
 
 var _ ScheduleTask = &DefaultScheduleServer{}
