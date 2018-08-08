@@ -1,7 +1,7 @@
 package core
 
-// APIInfo API 接口信息
-type APIInfo struct {
+// API API 接口信息
+type API struct {
 	Method       string
 	URI          string
 	ResponseType string
@@ -9,32 +9,48 @@ type APIInfo struct {
 
 // Kernel 默认核心类
 type Kernel struct {
-	scheduleServer ScheduleTask
-	certificate    map[string]string
+	schedules map[string]ScheduleTask
 }
+
+const (
+	// ResponseJSON 返回类型 json
+	ResponseJSON = "json"
+
+	// ResponseXML 返回类型 xml
+	ResponseXML = "xml"
+)
 
 var log Log
 
 // NewKernel 初始化
 func NewKernel() *Kernel {
-	return &Kernel{}
+	return &Kernel{
+		schedules: make(map[string]ScheduleTask),
+	}
 }
 
 // SetScheduleTask 设置定时任务
-func (t *Kernel) SetScheduleTask(scheduleServer ScheduleTask) {
-	t.scheduleServer = scheduleServer
+func (t *Kernel) SetScheduleTask(id string, schedule ScheduleTask) {
+	t.schedules[id] = schedule
 }
 
 // SetTask 设置任务
-func (t *Kernel) SetTask(task Task) {
-	t.scheduleServer = NewDefaultScheduleServer()
-	taskServer, _ := t.scheduleServer.(*DefaultScheduleServer)
+func (t *Kernel) SetTask(id string, task Task) {
+	schedule, ok := t.schedules[id]
+	if !ok {
+		schedule = NewDefaultScheduleServer()
+		t.schedules[id] = schedule
+	}
+
+	taskServer, _ := schedule.(*DefaultScheduleServer)
 	taskServer.SetTask(task)
 }
 
-// StartTokenServer 启动 AccessTokenServer
-func (t *Kernel) StartTokenServer() {
-	t.scheduleServer.Start()
+// StartTask 启动 AccessTokenServer
+func (t *Kernel) StartTask(id string) {
+	if schedule, ok := t.schedules[id]; ok {
+		schedule.Start()
+	}
 }
 
 // SetLogInst 设置全局日志实例

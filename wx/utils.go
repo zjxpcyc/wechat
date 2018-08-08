@@ -1,4 +1,4 @@
-package wechat
+package wx
 
 import (
 	"errors"
@@ -23,5 +23,5 @@ func checkJSONResult(res map[string]interface{}) error {
 
 	msg, _ := errmsg.(string)
 	log.Error("接口返回错误: " + strconv.Itoa(errNum) + "-" + msg)
-	return errors.New(msg)
+	return errors.New(strconv.Itoa(errNum) + "-" + msg)
 }
