@@ -51,4 +51,28 @@ var API = map[string]map[string]core.API{
 			ResponseType: "json",
 		},
 	},
+	"tpl_message": map[string]core.API{
+		"send": core.API{
+			Method:       http.MethodPost,
+			URI:          "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN",
+			ResponseType: "json",
+		},
+	},
+	"menu": map[string]core.API{
+		"create": core.API{
+			Method:       http.MethodPost,
+			URI:          "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=ACCESS_TOKEN",
+			ResponseType: "json",
+		},
+		"delete": core.API{
+			Method:       http.MethodGet,
+			URI:          "https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=ACCESS_TOKEN",
+			ResponseType: "json",
+		},
+		"get": core.API{
+			Method:       http.MethodGet,
+			URI:          "https://api.weixin.qq.com/cgi-bin/menu/get?access_token=ACCESS_TOKEN",
+			ResponseType: "json",
+		},
+	},
 }

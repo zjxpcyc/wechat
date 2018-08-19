@@ -127,9 +127,10 @@ func (t *Client) createQrCode(message QRCodeMessage) (*QRCodeResult, error) {
 		return nil, err
 	}
 
+	expire, _ := res["expire_seconds"].(float64)
 	qrRes := QRCodeResult{
 		Ticket:        res["ticket"].(string),
-		ExpireSeconds: res["expire_seconds"].(int64),
+		ExpireSeconds: int64(expire),
 		URL:           res["url"].(string),
 	}
 
