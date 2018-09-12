@@ -44,7 +44,10 @@ func (t *Client) GetUserInfo(code string) (map[string]interface{}, error) {
 	res, err = t.request.Do(api, params)
 	if err != nil {
 		log.Error("获取 Oauth2 用户信息 失败, ", err.Error())
-		return nil, err
+
+		// 即使失败也会返回 openid
+		res["openid"] = openID
+		return res, err
 	}
 
 	return res, nil
