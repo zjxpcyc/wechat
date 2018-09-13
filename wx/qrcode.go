@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/url"
-	"strings"
 	"time"
 )
 
@@ -57,23 +56,8 @@ func (t *Client) GetTempStrQRCode(message string, expire ...time.Duration) (stri
 
 	res, err := t.createQrCode(qrcode)
 	if err != nil {
-		errMsg := err.Error()
-
-		// 如果 access-token 有问题就重新获取
-		if strings.Index(errMsg, "40001") > -1 ||
-			strings.Index(errMsg, "40014") > -1 ||
-			strings.Index(errMsg, "42001") > -1 {
-
-			t.AccessTokenTask()
-			res, err = t.createQrCode(qrcode)
-			if err != nil {
-				return "", err
-			}
-
-			return res.URL, err
-		} else {
-			return "", err
-		}
+		log.Error("创建二维码失败", err.Error())
+		return "", err
 	}
 
 	return res.URL, nil
@@ -113,28 +97,11 @@ func (t *Client) GetTempIntQRCode(message int64, expire ...time.Duration) (strin
 	}
 
 	res, err := t.createQrCode(qrcode)
-
 	if err != nil {
-		errMsg := err.Error()
-
-		// 如果 access-token 有问题就重新获取
-		if strings.Index(errMsg, "40001") > -1 ||
-			strings.Index(errMsg, "40014") > -1 ||
-			strings.Index(errMsg, "42001") > -1 {
-
-			t.AccessTokenTask()
-			res, err = t.createQrCode(qrcode)
-			if err != nil {
-				return "", err
-			}
-
-			return res.URL, err
-		}
-	}
-
-	if err != nil {
+		log.Error("创建二维码失败", err.Error())
 		return "", err
 	}
+
 	return res.URL, err
 }
 

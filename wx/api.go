@@ -75,4 +75,11 @@ var API = map[string]map[string]core.API{
 			ResponseType: "json",
 		},
 	},
+	"jssdk": map[string]core.API{
+		"ticket": core.API{
+			Method:       http.MethodGet,
+			URI:          "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=ACCESS_TOKEN&type=jsapi",
+			ResponseType: "json",
+		},
+	},
 }

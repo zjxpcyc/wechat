@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/url"
-	"strings"
 )
 
 // TplMessageData 模板消息节点
@@ -50,22 +49,6 @@ func (t *Client) SendTplMessage(to, tplID, link string, data map[string]TplMessa
 	_, err = t.request.Do(api, params, bytes.NewBuffer(b))
 	if err != nil {
 		log.Error("发送模板消息失败", err.Error())
-
-		errMsg := err.Error()
-		// 如果 access-token 有问题就重新执行一次
-		if strings.Index(errMsg, "40001") > -1 ||
-			strings.Index(errMsg, "40014") > -1 ||
-			strings.Index(errMsg, "42001") > -1 {
-
-			t.AccessTokenTask()
-			_, err = t.request.Do(api, params, bytes.NewBuffer(b))
-			if err != nil {
-				return err
-			}
-
-			return nil
-		}
-
 		return err
 	}
 

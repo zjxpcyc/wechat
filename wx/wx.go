@@ -13,6 +13,7 @@ var log core.Log
 // Client 微信公众号接口客户端
 type Client struct {
 	accessToken string
+	jsTicket    string
 	kernel      *core.Kernel
 	request     core.Request
 
@@ -36,6 +37,9 @@ func NewClient(certificate map[string]string) *Client {
 
 	cli.kernel.SetTask("access-token", cli.AccessTokenTask)
 	cli.kernel.StartTask("access-token")
+
+	cli.kernel.SetTask("js-ticket", cli.JsTicketTask)
+	cli.kernel.StartTask("js-ticket")
 
 	return cli
 }
