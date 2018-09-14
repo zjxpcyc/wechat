@@ -20,7 +20,7 @@ type Client struct {
 }
 
 // NewClient 初始客户端
-func NewClient(certificate map[string]string, log core.Log) *Client {
+func NewClient(certificate map[string]string) *Client {
 	cli := &Client{
 		request:     core.NewDefaultRequest(checkJSONResult),
 		kernel:      core.NewKernel(),
