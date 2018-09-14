@@ -3,8 +3,6 @@ package mini
 import (
 	"errors"
 	"strconv"
-
-	"github.com/lunny/log"
 )
 
 func checkJSONResult(res map[string]interface{}) error {
