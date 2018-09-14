@@ -4,6 +4,8 @@ import (
 	"github.com/zjxpcyc/wechat/core"
 )
 
+var log core.Log
+
 // Client 微信小程序接口客户端
 type Client struct {
 	kernel  *core.Kernel
@@ -26,4 +28,14 @@ func NewClient(certificate map[string]string, log core.Log) *Client {
 	}
 
 	return cli
+}
+
+// SetLogInst 设置全局日志实例
+func SetLogInst(l core.Log) {
+	core.SetLogInst(l)
+	log = l
+}
+
+func init() {
+	log = &core.DefaultLogger{}
 }

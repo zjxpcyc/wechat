@@ -3,7 +3,6 @@ package mini
 import (
 	"net/url"
 
-	"github.com/lunny/log"
 	"github.com/zjxpcyc/wechat/core"
 )
 
