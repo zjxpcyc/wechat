@@ -7,7 +7,7 @@ import (
 // ScheduleTask 定时任务
 type ScheduleTask interface {
 	// Start 启动服务
-	Start()
+	Start(delay ...time.Duration)
 
 	// Stop 停止服务
 	Stop()
@@ -40,8 +40,8 @@ func (t *DefaultScheduleServer) Stop() {
 }
 
 // Start 启动服务
-func (t *DefaultScheduleServer) Start() {
-	go t.start()
+func (t *DefaultScheduleServer) Start(delay ...time.Duration) {
+	go t.start(delay...)
 }
 
 /**
@@ -49,8 +49,12 @@ func (t *DefaultScheduleServer) Start() {
 * 不依赖文件系统 或者 DB, 依据每次调用反馈的结果，进行下一次任务定时设置
  */
 
-func (t *DefaultScheduleServer) start() {
+func (t *DefaultScheduleServer) start(delay ...time.Duration) {
 	go func() {
+		if delay != nil && len(delay) > 0 {
+			time.Sleep(delay[0])
+		}
+
 		d := t.task() // 上次任务, 返回下一次的执行周期
 		for {
 			time.Sleep(d)

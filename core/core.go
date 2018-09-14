@@ -1,5 +1,9 @@
 package core
 
+import (
+	"time"
+)
+
 // API API 接口信息
 type API struct {
 	Method       string
@@ -46,10 +50,10 @@ func (t *Kernel) SetTask(id string, task Task) {
 	taskServer.SetTask(task)
 }
 
-// StartTask 启动 AccessTokenServer
-func (t *Kernel) StartTask(id string) {
+// StartTask 启动
+func (t *Kernel) StartTask(id string, delay ...time.Duration) {
 	if schedule, ok := t.schedules[id]; ok {
-		schedule.Start()
+		schedule.Start(delay...)
 	}
 }
 

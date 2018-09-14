@@ -2,6 +2,7 @@ package wx
 
 import (
 	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -39,6 +40,17 @@ func (t *Client) getJsTicket() (string, int64, error) {
 	return ticket, int64(expire), nil
 }
 
-func (t *Client) JsTicketSign(url string) (map[string]string, error) {
-	return nil, nil
+// GetJsTicketSignature js-sdk signature
+func (t *Client) GetJsTicketSignature(url string) map[string]string {
+	noncestr := RandomString(16)
+	timestamp := strconv.FormatInt(time.Now().Local().Unix(), 10)
+
+	signature := JsTicketSignature(url, noncestr, t.jsTicket, timestamp)
+
+	return map[string]string{
+		"noncestr":  noncestr,
+		"timestamp": timestamp,
+		"signature": signature,
+		"appId":     t.certificate["appid"],
+	}
 }

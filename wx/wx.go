@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"sort"
+	"time"
 
 	"github.com/zjxpcyc/wechat/core"
 )
@@ -39,7 +40,7 @@ func NewClient(certificate map[string]string) *Client {
 	cli.kernel.StartTask("access-token")
 
 	cli.kernel.SetTask("js-ticket", cli.JsTicketTask)
-	cli.kernel.StartTask("js-ticket")
+	cli.kernel.StartTask("js-ticket", 30*time.Second)
 
 	return cli
 }

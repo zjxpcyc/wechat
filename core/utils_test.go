@@ -21,3 +21,20 @@ func TestURLValues2XMLString(t *testing.T) {
 		t.Fatalf("Transfrom url.Values to xml string fail, %s", res)
 	}
 }
+
+func TestRandomIntn(t *testing.T) {
+	res1 := core.RandomIntn(6, 26)
+	res2 := core.RandomIntn(6, 26)
+
+	same := true
+	for i := 0; i < 26; i++ {
+		if res1[i] != res2[i] {
+			same = false
+			break
+		}
+	}
+
+	if same {
+		t.Fatalf("TestRandomIntn fail-%v", res1, res2)
+	}
+}
