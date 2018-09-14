@@ -4,6 +4,7 @@ import (
 	"net/url"
 
 	"github.com/lunny/log"
+	"github.com/zjxpcyc/wechat/core"
 )
 
 // GetOpenID 获取用户 OpenID
@@ -27,7 +28,7 @@ func (t *Client) GetOpenID(code string) (map[string]interface{}, error) {
 
 // GetUserFromEncryptData 解析加密数据
 func (t *Client) GetUserFromEncryptData(encryptedData, sessionKey, iv string) (map[string]interface{}, error) {
-	res, err := Decrypt(encryptedData, iv, sessionKey)
+	res, err := core.DecodeMiniData(encryptedData, iv, sessionKey)
 	if err != nil {
 		log.Error("解密小程序数据失败", err.Error())
 		return nil, err

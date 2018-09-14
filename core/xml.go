@@ -16,6 +16,10 @@ const (
 	NodeValue
 )
 
+type XMLCDATA struct {
+	Value string `xml:",cdata"`
+}
+
 type XMLElement struct {
 	TagName  string
 	Value    string

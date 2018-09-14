@@ -1,9 +1,7 @@
 package wx
 
 import (
-	"crypto/sha1"
 	"errors"
-	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -32,20 +30,6 @@ func checkJSONResult(res map[string]interface{}) error {
 	return errors.New(strconv.Itoa(errNum) + "-" + msg)
 }
 
-// RandomString 随机字符
-func RandomString(l int) string {
-	serial := strings.Split("1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", "")
-
-	nums := core.RandomIntn(l, len(serial))
-
-	res := []string{}
-	for i := 0; i < l; i++ {
-		res = append(res, serial[nums[i]])
-	}
-
-	return strings.Join(res, "")
-}
-
 // JsTicketSignature 计算 js-ticket signature
 func JsTicketSignature(url, noncestr, ticket, timestamp string) string {
 	willSign := []string{
@@ -57,12 +41,5 @@ func JsTicketSignature(url, noncestr, ticket, timestamp string) string {
 	sort.Strings(willSign)
 	str2Sign := strings.Join(willSign, "&")
 
-	return Sha1(str2Sign)
-}
-
-//Sha1  sha1 小写
-func Sha1(s string) string {
-	h := sha1.New()
-	h.Write([]byte(s))
-	return fmt.Sprintf("%x", h.Sum(nil))
+	return core.Sha1(str2Sign)
 }

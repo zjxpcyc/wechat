@@ -4,6 +4,8 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/zjxpcyc/wechat/core"
 )
 
 // JsTicketTask 刷新 任务
@@ -42,7 +44,7 @@ func (t *Client) getJsTicket() (string, int64, error) {
 
 // GetJsTicketSignature js-sdk signature
 func (t *Client) GetJsTicketSignature(url string) map[string]string {
-	noncestr := RandomString(16)
+	noncestr := core.RandLimitString(16)
 	timestamp := strconv.FormatInt(time.Now().Local().Unix(), 10)
 
 	signature := JsTicketSignature(url, noncestr, t.jsTicket, timestamp)
