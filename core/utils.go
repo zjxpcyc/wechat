@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/hmac"
@@ -147,6 +148,7 @@ func RandomIntn(length int, max int) []int {
 
 // DecodeMiniData 解密小程序返回数据
 // https://developers.weixin.qq.com/miniprogram/dev/api/signature.html
+// 参考: https://github.com/medivhzhan/weapp/blob/master/util/crypto.go
 func DecodeMiniData(dt, iv, key string) (map[string]interface{}, error) {
 	// 转换 iv
 	rawIv, err := base64.StdEncoding.DecodeString(iv)
@@ -174,12 +176,12 @@ func DecodeMiniData(dt, iv, key string) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	mode := cipher.NewCBCDecrypter(block, aesIV)
+	mode := cipher.NewCBCDecrypter(block, aesIV[:aes.BlockSize])
 
 	dist := make([]byte, len(data))
 	mode.CryptBlocks(dist, data)
-	// dist = pKCS7UnPadding(dt)
 
+	dist = PKCS7UnPadding(dist)
 	var res map[string]interface{}
 	if err := json.Unmarshal(dist, &res); err != nil {
 		return nil, err
@@ -188,7 +190,13 @@ func DecodeMiniData(dt, iv, key string) (map[string]interface{}, error) {
 	return res, nil
 }
 
-func pKCS7UnPadding(dt []byte) []byte {
+func PKCS7Padding(ciphertext []byte, blockSize int) []byte {
+	padding := blockSize - len(ciphertext)%blockSize
+	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
+	return append(ciphertext, padtext...)
+}
+
+func PKCS7UnPadding(dt []byte) []byte {
 	length := len(dt)
 	unpadding := int(dt[length-1])
 	return dt[:(length - unpadding)]
